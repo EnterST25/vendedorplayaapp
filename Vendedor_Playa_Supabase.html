@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendedor de Playa - YPF Conectado</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 5px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .status { 
+            text-align: center; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 12px;
+        }
+        .status.connected { background: #e8f5e9; color: #2e7d32; }
+        .status.disconnected { background: #ffebee; color: #c62828; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-color: #2a5298;
+        }
+        .module { display: none; }
+        .module.active { display: block; }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .field {
+            margin-bottom: 15px;
+        }
+        .field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 13px;
+        }
+        .field input, .field select, .field textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 13px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(42,82,152,0.3); }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-danger { background: #f44336; }
+        .promo-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2a5298;
+        }
+        .promo-title { font-weight: 600; color: #1e3c72; font-size: 13px; }
+        .promo-detail { font-size: 12px; color: #666; margin-top: 3px; }
+        .total-field {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .status-good { background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; margin: 10px 0; }
+        .status-warning { background: #fff3e0; color: #f57c00; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; margin: 10px 0; }
+        .empty { text-align: center; padding: 20px; color: #999; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .tabs { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Vendedor de Playa</h1>
+            <p>YPF Salta Capital - Conectado a Supabase</p>
+        </div>
+
+        <div id="status" class="status disconnected">🔴 Conectando...</div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="tab(0)">🎯 Promociones</button>
+            <button class="tab-btn" onclick="tab(1)">📄 Cargar PDF</button>
+            <button class="tab-btn" onclick="tab(2)">📋 Cierre de Turno</button>
+            <button class="tab-btn" onclick="tab(3)">💰 Calc. Tope</button>
+        </div>
+
+        <!-- TAB 1: PROMOCIONES -->
+        <div class="module active" id="tab0">
+            <div class="section">
+                <div class="section-title">🎯 Consultar Promociones por Fecha</div>
+                
+                <div class="grid-2">
+                    <div class="field">
+                        <label>Fecha</label>
+                        <input type="date" id="fechaConsulta" onchange="buscarPromos()">
+                    </div>
+                    <div class="field">
+                        <label>Mes</label>
+                        <select id="mesConsulta" onchange="buscarPromos()">
+                            <option value="">-- Todos --</option>
+                            <option value="enero">Enero</option>
+                            <option value="febrero">Febrero</option>
+                            <option value="marzo">Marzo</option>
+                            <option value="abril">Abril</option>
+                            <option value="mayo">Mayo</option>
+                            <option value="junio">Junio</option>
+                            <option value="julio">Julio</option>
+                            <option value="agosto">Agosto</option>
+                            <option value="septiembre">Septiembre</option>
+                            <option value="octubre">Octubre</option>
+                            <option value="noviembre">Noviembre</option>
+                            <option value="diciembre">Diciembre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="usarHoy()" style="width: auto; flex: 1;">Hoy</button>
+                    <button class="btn btn-secondary" onclick="usarMañana()" style="width: auto; flex: 1;">Mañana</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🔍 Buscar por Banco/Empresa</div>
+                
+                <div class="field">
+                    <label>Banco o empresa</label>
+                    <input type="text" id="filtroBanco" placeholder="Ej: Macro, ACA, Brubank..." onkeyup="filtrarPorBanco()">
+                </div>
+
+                <div class="field">
+                    <label>Categoría</label>
+                    <select id="filtroCategoria" onchange="filtrarPorBanco()">
+                        <option value="">-- Todas --</option>
+                        <option value="combustibles">⛽ Combustibles</option>
+                        <option value="tienda">🛒 Tienda</option>
+                        <option value="gnc">🔵 GNC</option>
+                        <option value="boxes">🔧 Boxes</option>
+                        <option value="billeteras">💳 Billeteras</option>
+                        <option value="bancos">🏦 Bancos</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="promosResultado"></div>
+        </div>
+
+        <!-- TAB 2: CARGAR PDF -->
+        <div class="module" id="tab1">
+            <div class="section">
+                <div class="section-title">📄 Cargar PDF de Promociones</div>
+                
+                <div class="field">
+                    <label>Selecciona mes</label>
+                    <select id="mesPDF">
+                        <option value="">-- Selecciona --</option>
+                        <option value="enero">Enero 2026</option>
+                        <option value="febrero">Febrero 2026</option>
+                        <option value="marzo">Marzo 2026</option>
+                        <option value="abril">Abril 2026</option>
+                        <option value="mayo">Mayo 2026</option>
+                        <option value="junio">Junio 2026</option>
+                        <option value="julio">Julio 2026</option>
+                        <option value="agosto">Agosto 2026</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Archivo PDF</label>
+                    <input type="file" id="archivoPDF" accept=".pdf">
+                </div>
+
+                <button class="btn" onclick="cargarPDF()">Procesar PDF</button>
+                
+                <div id="estadoPDF" style="margin-top: 15px;"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📋 PDFs Cargados</div>
+                <div id="listaPDFs"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: CIERRE DE TURNO -->
+        <div class="module" id="tab2">
+            <div class="section">
+                <div class="section-title">📋 Información del Turno</div>
+                
+                <div class="grid-2">
+                    <div class="field">
+                        <label>Fecha</label>
+                        <input type="date" id="fechaCierre">
+                    </div>
+                    <div class="field">
+                        <label>Turno</label>
+                        <input type="text" id="turnoCierre" placeholder="Turno 1">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Cajero</label>
+                    <input type="text" id="cajeroCierre" placeholder="Tu nombre">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">⛽ VENTAS</div>
+                
+                <div class="grid-2">
+                    <div class="field">
+                        <label>Líquidos $</label>
+                        <input type="number" id="liquidos" step="0.01" onchange="calcularCierre()">
+                    </div>
+                    <div class="field">
+                        <label>Lubricantes $</label>
+                        <input type="number" id="lubricantes" step="0.01" onchange="calcularCierre()">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Otros $</label>
+                    <input type="number" id="otros" step="0.01" onchange="calcularCierre()">
+                </div>
+
+                <div class="total-field">Total Ventas: $<span id="totalVentas">0.00</span></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">💳 COBROS</div>
+                
+                <div class="grid-2">
+                    <div class="field">
+                        <label>Efectivo $</label>
+                        <input type="number" id="efectivo" step="0.01" onchange="calcularCierre()">
+                    </div>
+                    <div class="field">
+                        <label>Tarjetas $</label>
+                        <input type="number" id="tarjetas" step="0.01" onchange="calcularCierre()">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Otros cobros $</label>
+                    <input type="number" id="otroCobro" step="0.01" onchange="calcularCierre()">
+                </div>
+
+                <div class="total-field">Total Cobros: $<span id="totalCobros">0.00</span></div>
+            </div>
+
+            <div id="estadoCierre"></div>
+
+            <div class="section">
+                <div class="field">
+                    <label>Observaciones</label>
+                    <textarea id="observaciones" placeholder="Notas del turno"></textarea>
+                </div>
+
+                <button class="btn" onclick="guardarCierre()">💾 Guardar Cierre</button>
+            </div>
+        </div>
+
+        <!-- TAB 4: CALCULADORA DE TOPE -->
+        <div class="module" id="tab3">
+            <div class="section">
+                <div class="section-title">💰 Calculadora de Tope de Descuento</div>
+                
+                <div class="field">
+                    <label>Descuento %</label>
+                    <input type="number" id="calcDescuento" step="0.1" placeholder="Ej: 10, 15, 20..." onkeyup="calcularTope()">
+                </div>
+
+                <div class="field">
+                    <label>Tope máximo $</label>
+                    <input type="number" id="calcTope" step="0.01" placeholder="Ej: 3000, 15000..." onkeyup="calcularTope()">
+                </div>
+
+                <div id="resultadoTope"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📊 Ejemplo: ¿Cuánto consumir para max descuento?</div>
+                
+                <div class="promo-item">
+                    <div class="promo-title">Banco Macro - 20% descuento</div>
+                    <div class="promo-detail">Tope: $15.000 mensuales</div>
+                    <div style="margin-top: 8px; background: #e3f2fd; padding: 10px; border-radius: 6px;">
+                        <div style="font-weight: 600; color: #1565c0; margin-bottom: 5px;">Cálculo:</div>
+                        <div style="font-size: 12px; color: #555;">
+                            Tope ÷ % = Monto a consumir<br>
+                            $15.000 ÷ 20% = <strong>$75.000</strong><br>
+                            <em>El cliente debe gastar $75.000 para ahorrar $15.000</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN SUPABASE
+        const SUPABASE_URL = 'https://pwnryzxfwvraegvwsski.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3bnJ5enhmd3ZyYWVndndzc2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODgwNTIsImV4cCI6MjA5NDM2NDA1Mn0.K4MSFlQANfdUKIEyeNtGMS1HnwBmpLAA4hToWA2KJDI';
+        
+        let db;
+
+        // INICIALIZAR
+        async function inicializar() {
+            db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            try {
+                const { data, error } = await db.from('promociones').select('count', { count: 'exact' });
+                if (!error) {
+                    document.getElementById('status').textContent = '🟢 Conectado a Supabase';
+                    document.getElementById('status').className = 'status connected';
+                } else {
+                    throw error;
+                }
+            } catch (err) {
+                document.getElementById('status').textContent = '🔴 Error de conexión: ' + err.message;
+            }
+
+            document.getElementById('fechaCierre').valueAsDate = new Date();
+            document.getElementById('fechaConsulta').valueAsDate = new Date();
+            
+            cargarListaPDFs();
+            buscarPromos();
+        }
+
+        // CAMBIAR TABS
+        function tab(n) {
+            document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.module')[n].classList.add('active');
+            document.querySelectorAll('.tab-btn')[n].classList.add('active');
+        }
+
+        // BUSCAR PROMOCIONES
+        async function buscarPromos() {
+            const fecha = document.getElementById('fechaConsulta').value;
+            const mes = document.getElementById('mesConsulta').value;
+
+            if (!fecha && !mes) return;
+
+            try {
+                let query = db.from('promociones').select('*').eq('activa', true);
+
+                if (mes) query = query.eq('mes', mes);
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                let html = '<div class="section"><div class="section-title">Promociones encontradas</div>';
+                
+                if (data.length === 0) {
+                    html += '<div class="empty">📭 Sin promociones para esta búsqueda</div>';
+                } else {
+                    const grouped = {};
+                    data.forEach(p => {
+                        if (!grouped[p.dia]) grouped[p.dia] = {};
+                        if (!grouped[p.dia][p.categoria]) grouped[p.dia][p.categoria] = [];
+                        grouped[p.dia][p.categoria].push(p);
+                    });
+
+                    Object.entries(grouped).forEach(([dia, cats]) => {
+                        html += `<h3 style="color:#1e3c72; margin-top:12px; font-size:14px;">${dia.toUpperCase()}</h3>`;
+                        Object.entries(cats).forEach(([cat, promos]) => {
+                            html += `<h4 style="color:#666; margin-top:8px; font-size:12px;">${cat}</h4>`;
+                            promos.forEach(p => {
+                                html += `<div class="promo-item">
+                                    <div class="promo-title">${p.descuento} - ${p.detalles}</div>
+                                    ${p.tope ? `<div class="promo-detail">⚠️ ${p.tope}</div>` : ''}
+                                </div>`;
+                            });
+                        });
+                    });
+                }
+
+                html += '</div>';
+                document.getElementById('promosResultado').innerHTML = html;
+            } catch (err) {
+                alert('Error al buscar: ' + err.message);
+            }
+        }
+
+        function usarHoy() {
+            document.getElementById('fechaConsulta').valueAsDate = new Date();
+            buscarPromos();
+        }
+
+        function usarMañana() {
+            const m = new Date();
+            m.setDate(m.getDate() + 1);
+            document.getElementById('fechaConsulta').valueAsDate = m;
+            buscarPromos();
+        }
+
+        // FILTRAR POR BANCO/EMPRESA
+        async function filtrarPorBanco() {
+            const banco = document.getElementById('filtroBanco').value.toLowerCase();
+            const categoria = document.getElementById('filtroCategoria').value;
+
+            if (!banco && !categoria) {
+                document.getElementById('promosResultado').innerHTML = '<div class="empty">📭 Ingresa un banco o selecciona categoría</div>';
+                return;
+            }
+
+            try {
+                let query = db.from('promociones').select('*').eq('activa', true);
+
+                if (categoria) {
+                    query = query.eq('categoria', categoria);
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                // Filtrar por nombre de banco en detalles
+                let resultados = data;
+                if (banco) {
+                    resultados = data.filter(p => 
+                        p.detalles.toLowerCase().includes(banco) || 
+                        p.descuento.toLowerCase().includes(banco)
+                    );
+                }
+
+                let html = '<div class="section"><div class="section-title">Resultados de búsqueda</div>';
+                
+                if (resultados.length === 0) {
+                    html += '<div class="empty">📭 Sin resultados</div>';
+                } else {
+                    const grouped = {};
+                    resultados.forEach(p => {
+                        if (!grouped[p.dia]) grouped[p.dia] = [];
+                        grouped[p.dia].push(p);
+                    });
+
+                    Object.entries(grouped).forEach(([dia, promos]) => {
+                        html += `<h3 style="color:#1e3c72; margin-top:12px; font-size:14px; font-weight:600;">${dia.toUpperCase()}</h3>`;
+                        promos.forEach(p => {
+                            html += `<div class="promo-item">
+                                <div class="promo-title">${p.descuento} - ${p.detalles}</div>
+                                <div class="promo-detail">📁 ${p.categoria}</div>
+                                ${p.tope ? `<div class="promo-detail">⚠️ ${p.tope}</div>` : ''}
+                            </div>`;
+                        });
+                    });
+                }
+
+                html += '</div>';
+                document.getElementById('promosResultado').innerHTML = html;
+            } catch (err) {
+                alert('Error en búsqueda: ' + err.message);
+            }
+        }
+
+        // CARGAR PDF
+        async function cargarPDF() {
+            const mes = document.getElementById('mesPDF').value;
+            const archivo = document.getElementById('archivoPDF').files[0];
+
+            if (!mes || !archivo) {
+                alert('Selecciona mes y archivo');
+                return;
+            }
+
+            document.getElementById('estadoPDF').innerHTML = '<p style="color:#2196F3;">⏳ Procesando...</p>';
+
+            // Aquí irían los pasos para procesar el PDF
+            // Por ahora solo guardamos que se subió
+            try {
+                const { data, error } = await db.from('pdfs_cargados').insert({
+                    mes: mes,
+                    url: archivo.name,
+                    procesado: false
+                });
+
+                if (error) throw error;
+                document.getElementById('estadoPDF').innerHTML = '<p style="color:#4CAF50;">✅ PDF registrado. Procesando promos...</p>';
+                document.getElementById('archivoPDF').value = '';
+                document.getElementById('mesPDF').value = '';
+                cargarListaPDFs();
+            } catch (err) {
+                document.getElementById('estadoPDF').innerHTML = '<p style="color:#f44336;">❌ Error: ' + err.message + '</p>';
+            }
+        }
+
+        async function cargarListaPDFs() {
+            try {
+                const { data, error } = await db.from('pdfs_cargados').select('*').order('fecha_carga', { ascending: false });
+                if (error) throw error;
+
+                let html = '';
+                if (data.length === 0) {
+                    html = '<div class="empty">📭 Sin PDFs cargados</div>';
+                } else {
+                    data.forEach(pdf => {
+                        html += `<div class="promo-item">
+                            <div class="promo-title">${pdf.mes.toUpperCase()} - ${pdf.url}</div>
+                            <div class="promo-detail">${pdf.procesado ? '✅ Procesado' : '⏳ Pendiente'}</div>
+                        </div>`;
+                    });
+                }
+                document.getElementById('listaPDFs').innerHTML = html;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // CIERRE DE TURNO
+        function calcularCierre() {
+            const ventas = (parseFloat(document.getElementById('liquidos').value) || 0) +
+                          (parseFloat(document.getElementById('lubricantes').value) || 0) +
+                          (parseFloat(document.getElementById('otros').value) || 0);
+            document.getElementById('totalVentas').textContent = ventas.toFixed(2);
+
+            const cobros = (parseFloat(document.getElementById('efectivo').value) || 0) +
+                          (parseFloat(document.getElementById('tarjetas').value) || 0) +
+                          (parseFloat(document.getElementById('otroCobro').value) || 0);
+            document.getElementById('totalCobros').textContent = cobros.toFixed(2);
+
+            const dif = cobros - ventas;
+            let html = '';
+            if (Math.abs(dif) < 0.01) {
+                html = '<div class="status-good">✅ ¡CUADRE PERFECTO!</div>';
+            } else if (Math.abs(dif) < 100) {
+                html = `<div class="status-warning">⚠️ Diferencia: $${Math.abs(dif).toFixed(2)}</div>`;
+            } else {
+                html = `<div class="status-warning">❌ Diferencia importante: $${Math.abs(dif).toFixed(2)}</div>`;
+            }
+            document.getElementById('estadoCierre').innerHTML = html;
+        }
+
+        async function guardarCierre() {
+            const fecha = document.getElementById('fechaCierre').value;
+            const turno = document.getElementById('turnoCierre').value;
+            const cajero = document.getElementById('cajeroCierre').value;
+
+            if (!fecha || !turno || !cajero) {
+                alert('Completa todos los campos requeridos');
+                return;
+            }
+
+            try {
+                const { error } = await db.from('cierres_turno').insert({
+                    fecha: fecha,
+                    turno: turno,
+                    cajero: cajero,
+                    total_liquidos: parseFloat(document.getElementById('liquidos').value) || 0,
+                    total_lubricantes: parseFloat(document.getElementById('lubricantes').value) || 0,
+                    total_otros: parseFloat(document.getElementById('otros').value) || 0,
+                    efectivo: parseFloat(document.getElementById('efectivo').value) || 0,
+                    tarjetas: parseFloat(document.getElementById('tarjetas').value) || 0,
+                    otros_cobros: parseFloat(document.getElementById('otroCobro').value) || 0,
+                    observaciones: document.getElementById('observaciones').value
+                });
+
+                if (error) throw error;
+                alert('✅ Cierre guardado en la nube');
+                limpiarCierre();
+            } catch (err) {
+                alert('❌ Error al guardar: ' + err.message);
+            }
+        }
+
+        function limpiarCierre() {
+            document.getElementById('liquidos').value = '';
+            document.getElementById('lubricantes').value = '';
+            document.getElementById('otros').value = '';
+            document.getElementById('efectivo').value = '';
+            document.getElementById('tarjetas').value = '';
+            document.getElementById('otroCobro').value = '';
+            document.getElementById('observaciones').value = '';
+            document.getElementById('fechaCierre').valueAsDate = new Date();
+            calcularCierre();
+        }
+
+        // CALCULADORA DE TOPE
+        function calcularTope() {
+            const descuento = parseFloat(document.getElementById('calcDescuento').value);
+            const tope = parseFloat(document.getElementById('calcTope').value);
+
+            if (!descuento || !tope) {
+                document.getElementById('resultadoTope').innerHTML = '';
+                return;
+            }
+
+            // Fórmula: Tope ÷ (Descuento%) = Monto a gastar
+            const montoGastar = tope / (descuento / 100);
+            const ahorroTotal = tope;
+
+            let html = `
+            <div style="margin-top: 15px;">
+                <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; border-radius: 8px;">
+                    <h3 style="color: #2e7d32; margin-bottom: 10px; font-size: 14px;">📊 Resultado</h3>
+                    
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 3px;">Monto a consumir:</div>
+                        <div style="font-size: 24px; font-weight: 600; color: #2e7d32;">$${montoGastar.toFixed(2)}</div>
+                    </div>
+
+                    <div style="background: #fff9c4; padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 3px;">Ahorro total:</div>
+                        <div style="font-size: 20px; font-weight: 600; color: #f57f17;">$${ahorroTotal.toFixed(2)}</div>
+                    </div>
+
+                    <div style="margin-top: 10px; font-size: 11px; color: #555; font-style: italic;">
+                        💡 El cliente gastará <strong>$${montoGastar.toFixed(2)}</strong> para ahorrar <strong>$${ahorroTotal.toFixed(2)}</strong>
+                    </div>
+                </div>
+            </div>
+            `;
+            
+            document.getElementById('resultadoTope').innerHTML = html;
+        }
+
+        // INICIAR
+        window.addEventListener('load', inicializar);
+    </script>
+</body>
+</html>
