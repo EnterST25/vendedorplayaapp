@@ -1,1 +1,987 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendedor de Playa - YPF Salta</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .nav-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        .nav-btn.promo {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%);
+        }
+
+        .nav-btn.pdf {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        }
+
+        .nav-btn.cierre {
+            background: linear-gradient(135deg, #95E1D3 0%, #38A169 100%);
+        }
+
+        .nav-btn.calc {
+            background: linear-gradient(135deg, #F9D371 0%, #F4A259 100%);
+        }
+
+        .nav-btn.instrucciones {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn span {
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 30px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #0052CC;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #0052CC;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0052CC;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #0052CC;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003399;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 82, 204, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .nav-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .lote-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #0052CC;
+        }
+
+        .lote-item input {
+            margin-bottom: 10px;
+        }
+
+        .lote-item button {
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .lote-item button:hover {
+            background: #ff5252;
+        }
+
+        .total-box {
+            background: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .egresos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .egreso-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #FF6B6B;
+        }
+
+        .egreso-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .egreso-item input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #0052CC;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            color: #0052CC;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .instructions-list {
+            list-style: none;
+        }
+
+        .instructions-list li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .instructions-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #0052CC;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .promo-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #0052CC;
+        }
+
+        .promo-card h4 {
+            color: #0052CC;
+            margin-bottom: 8px;
+        }
+
+        .promo-card p {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Vendedor de Playa</h1>
+            <p>YPF Salta Capital – Conectado a Supabase</p>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span>Conectado a Supabase</span>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <button class="nav-btn promo" onclick="showSection('promociones')">
+                <span>🎯</span>
+                Promociones
+            </button>
+            <button class="nav-btn pdf" onclick="showSection('pdf')">
+                <span>📄</span>
+                Cargar PDF
+            </button>
+            <button class="nav-btn cierre" onclick="showSection('cierre')">
+                <span>📋</span>
+                Cierre de Turno
+            </button>
+            <button class="nav-btn calc" onclick="showSection('calc')">
+                <span>💰</span>
+                Calc. Tope
+            </button>
+            <button class="nav-btn instrucciones" onclick="showModal('instrucciones')">
+                <span>📖</span>
+                Instrucciones
+            </button>
+        </div>
+
+        <!-- Promociones Section -->
+        <div id="promociones" class="content">
+            <h2 class="section-title">🎯 Consultar Promociones por Fecha</h2>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="fechaPromo" value="2026-05-16">
+                </div>
+                <div class="form-group">
+                    <label>Mes</label>
+                    <select id="mesPromo">
+                        <option value="">-- Todos --</option>
+                        <option value="Mayo">Mayo 2026</option>
+                        <option value="Junio">Junio 2026</option>
+                    </select>
+                </div>
+            </div>
+
+            <input type="text" class="search-box" id="searchPromo" placeholder="🔍 Buscar por banco/empresa (ej: Macro, Brubank, etc.)">
+
+            <button class="btn btn-primary" onclick="buscarPromos()">Buscar Promociones</button>
+
+            <div id="resultadosPromo"></div>
+        </div>
+
+        <!-- Cargar PDF Section -->
+        <div id="pdf" class="content">
+            <h2 class="section-title">📄 Cargar PDF de Promociones</h2>
+            
+            <div class="form-group">
+                <label>Seleccionar PDF</label>
+                <input type="file" id="pdfFile" accept=".pdf">
+            </div>
+
+            <div class="form-group">
+                <label>Mes</label>
+                <select id="mesPDF">
+                    <option value="Mayo">Mayo 2026</option>
+                    <option value="Junio">Junio 2026</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary" onclick="cargarPDF()">Subir PDF</button>
+            <div id="pdfMessage"></div>
+        </div>
+
+        <!-- Cierre de Turno Section -->
+        <div id="cierre" class="content">
+            <h2 class="section-title">📋 Cierre de Turno</h2>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="fechaCierre" value="2026-05-16">
+                </div>
+                <div class="form-group">
+                    <label>Turno</label>
+                    <select id="turnoCierre">
+                        <option value="Mañana">Mañana (06:00 - 14:00)</option>
+                        <option value="Tarde">Tarde (14:00 - 22:00)</option>
+                        <option value="Noche">Noche (22:00 - 06:00)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Cajero/Vendedor</label>
+                <input type="text" id="cajero" placeholder="Tu nombre">
+            </div>
+
+            <!-- Ingresos por Combustible -->
+            <h3 style="margin-top: 30px; color: #0052CC;">💵 INGRESOS POR COMBUSTIBLE</h3>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nafta Super 95</label>
+                    <input type="number" id="nafta95" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Nafta Infinia</label>
+                    <input type="number" id="naftaInfinia" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Gasoil</label>
+                    <input type="number" id="gasoil" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>GNC</label>
+                    <input type="number" id="gnc" placeholder="0" min="0">
+                </div>
+            </div>
+
+            <!-- Lotes de Tarjetas -->
+            <h3 style="margin-top: 30px; color: #0052CC;">💳 LOTES DE TARJETAS (Máximo 5)</h3>
+            
+            <div id="lotesContainer"></div>
+
+            <button class="btn btn-secondary" onclick="agregarLote()" id="btnAgregarLote">+ Agregar Lote</button>
+
+            <div class="total-box" id="totalTarjetas">Total Tarjetas: $0</div>
+
+            <!-- Egresos -->
+            <h3 style="margin-top: 30px; color: #FF6B6B;">📤 EGRESOS</h3>
+
+            <div class="egresos-grid">
+                <div class="egreso-item">
+                    <label>Efectivo</label>
+                    <input type="number" id="egrEfectivo" placeholder="0" min="0" onchange="calcularEgresos()">
+                </div>
+                <div class="egreso-item">
+                    <label>Billetes</label>
+                    <input type="number" id="egrBilletes" placeholder="0" min="0" onchange="calcularEgresos()">
+                </div>
+                <div class="egreso-item">
+                    <label>Depósitos</label>
+                    <input type="number" id="egrDepositos" placeholder="0" min="0" onchange="calcularEgresos()">
+                </div>
+                <div class="egreso-item">
+                    <label>Cuentas Corrientes</label>
+                    <input type="number" id="egrCuentas" placeholder="0" min="0" onchange="calcularEgresos()">
+                </div>
+                <div class="egreso-item">
+                    <label>Medios Virtuales</label>
+                    <input type="number" id="egrMedios" placeholder="0" min="0" onchange="calcularEgresos()">
+                </div>
+                <div class="egreso-item">
+                    <label>Otros</label>
+                    <input type="number" id="egrOtros" placeholder="0" min="0" onchange="calcularEgresos()">
+                </div>
+            </div>
+
+            <div class="total-box" id="totalEgresos">Total Egresos: $0</div>
+
+            <!-- Cobros -->
+            <h3 style="margin-top: 30px; color: #0052CC;">💰 COBROS</h3>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Cobros en Efectivo</label>
+                    <input type="number" id="cobrosEfectivo" placeholder="0" min="0" onchange="calcularBalance()">
+                </div>
+                <div class="form-group">
+                    <label>Cobros en Tarjeta</label>
+                    <input type="number" id="cobrosTarjeta" placeholder="0" min="0" onchange="calcularBalance()">
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="form-group">
+                <label>Observaciones</label>
+                <textarea id="observaciones" placeholder="Notas del turno" rows="4"></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="guardarCierre()">💾 Guardar Cierre</button>
+
+            <div class="total-box" id="balanceFinal" style="margin-top: 20px; background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);">
+                Balance Final: $0
+            </div>
+
+            <div id="cierreMessage" class="success-message"></div>
+        </div>
+
+        <!-- Calculadora de Tope Section -->
+        <div id="calc" class="content">
+            <h2 class="section-title">💰 Calculadora de Tope de Descuento</h2>
+            
+            <div class="form-group">
+                <label>Tope de Descuento ($)</label>
+                <input type="number" id="topeDescuento" placeholder="ej: 2000" min="0" onchange="calcularTope()">
+            </div>
+
+            <div class="form-group">
+                <label>Porcentaje de Descuento (%)</label>
+                <input type="number" id="porcentajeDescuento" placeholder="ej: 10" min="0" max="100" onchange="calcularTope()">
+            </div>
+
+            <button class="btn btn-primary" onclick="calcularTope()">Calcular</button>
+
+            <div id="resultadoTope"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Instrucciones -->
+    <div id="instruccionesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📖 Instrucciones de Uso</h2>
+                <button class="close-btn" onclick="closeModal('instrucciones')">&times;</button>
+            </div>
+            
+            <h3 style="color: #0052CC; margin-top: 20px;">1. 🎯 Promociones</h3>
+            <ul class="instructions-list">
+                <li>Selecciona una fecha o mes</li>
+                <li>Busca por banco (ej: Macro, Galicia, Brubank)</li>
+                <li>Verás todas las promociones activas</li>
+                <li>Consulta el descuento, tope mensual y detalles</li>
+            </ul>
+
+            <h3 style="color: #0052CC; margin-top: 20px;">2. 📄 Cargar PDF</h3>
+            <ul class="instructions-list">
+                <li>Sube el PDF con promociones del mes</li>
+                <li>Selecciona el mes correspondiente</li>
+                <li>Hace backup en la nube (Supabase)</li>
+            </ul>
+
+            <h3 style="color: #0052CC; margin-top: 20px;">3. 📋 Cierre de Turno</h3>
+            <ul class="instructions-list">
+                <li>Carga todas las ventas por combustible</li>
+                <li>Ingresa los lotes de tarjetas (máx 5)</li>
+                <li>Registra egresos: efectivo, depósitos, medios virtuales, etc</li>
+                <li>Carga los cobros totales</li>
+                <li>El sistema calcula automáticamente si cuadra</li>
+                <li>Guarda todo en la nube</li>
+            </ul>
+
+            <h3 style="color: #0052CC; margin-top: 20px;">4. 💰 Calculadora de Tope</h3>
+            <ul class="instructions-list">
+                <li>Ingresa el tope de descuento del cliente</li>
+                <li>Ingresa el porcentaje de descuento</li>
+                <li>La app calcula cuánto debe consumir para maximizar el descuento</li>
+            </ul>
+
+            <h3 style="color: #0052CC; margin-top: 20px;">5. 🔧 Requisitos</h3>
+            <ul class="instructions-list">
+                <li>Funciona en PC, tablet y celular</li>
+                <li>Necesita conexión a internet para sincronizar con Supabase</li>
+                <li>Los datos se guardan automáticamente en la nube</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar Supabase
+        const SUPABASE_URL = 'https://pwnryzxfwvraegvwsski.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3bnJ5enhmd3ZyYWVndndzc2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3ODgwNTIsImV4cCI6MjA5NDM2NDA1Mn0.K4MSFlQANfdUKIEyeNtGMS1HnwBmpLAA4hToWA2KJDI';
+        
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let lotesCount = 0;
+
+        // Funciones de Navegación
+        function showSection(sectionId) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId + 'Modal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId + 'Modal').classList.remove('show');
+        }
+
+        // Promociones
+        async function buscarPromos() {
+            const fecha = document.getElementById('fechaPromo').value;
+            const mes = document.getElementById('mesPromo').value;
+            const search = document.getElementById('searchPromo').value.toLowerCase();
+
+            try {
+                let query = db.from('promociones').select('*');
+                
+                if (mes) {
+                    query = query.eq('mes', mes);
+                }
+                
+                const { data, error } = await query;
+
+                if (error) throw error;
+
+                let filtered = data || [];
+                if (search) {
+                    filtered = filtered.filter(p => 
+                        p.detalles.toLowerCase().includes(search) ||
+                        p.descuento.toLowerCase().includes(search)
+                    );
+                }
+
+                mostrarPromos(filtered);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color:red;">Error cargando promociones</p>';
+            }
+        }
+
+        function mostrarPromos(promos) {
+            const html = promos.length === 0 
+                ? '<p style="color: #999; text-align: center; padding: 20px;">No hay promociones para esa búsqueda</p>'
+                : promos.map(p => `
+                    <div class="promo-card">
+                        <h4>${p.descuento}</h4>
+                        <p><strong>Categoría:</strong> ${p.categoria}</p>
+                        <p><strong>Detalles:</strong> ${p.detalles}</p>
+                        <p><strong>Tope:</strong> ${p.tope}</p>
+                    </div>
+                `).join('');
+
+            document.getElementById('resultadosPromo').innerHTML = html;
+        }
+
+        // Cargar PDF
+        async function cargarPDF() {
+            const file = document.getElementById('pdfFile').files[0];
+            const mes = document.getElementById('mesPDF').value;
+
+            if (!file) {
+                alert('Selecciona un PDF');
+                return;
+            }
+
+            try {
+                const { data, error } = await db.from('pdfs_cargados').insert({
+                    mes: mes,
+                    url: file.name,
+                    fecha_carga: new Date().toISOString(),
+                    procesado: false
+                });
+
+                if (error) throw error;
+
+                document.getElementById('pdfMessage').innerHTML = '<div class="success-message show">✓ PDF cargado exitosamente</div>';
+                document.getElementById('pdfFile').value = '';
+
+                setTimeout(() => {
+                    document.getElementById('pdfMessage').innerHTML = '';
+                }, 3000);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('pdfMessage').innerHTML = '<p style="color:red;">Error cargando PDF</p>';
+            }
+        }
+
+        // Lotes de Tarjetas
+        function agregarLote() {
+            if (lotesCount >= 5) {
+                alert('Máximo 5 lotes permitidos');
+                return;
+            }
+
+            lotesCount++;
+            const loteHTML = `
+                <div class="lote-item" id="lote-${lotesCount}">
+                    <div class="form-group">
+                        <label>Lote ${lotesCount}</label>
+                        <input type="number" class="lote-input" placeholder="Monto en $" min="0" onchange="calcularTotalTarjetas()">
+                    </div>
+                    <button onclick="eliminarLote(${lotesCount})">Eliminar</button>
+                </div>
+            `;
+
+            document.getElementById('lotesContainer').innerHTML += loteHTML;
+
+            if (lotesCount >= 5) {
+                document.getElementById('btnAgregarLote').disabled = true;
+                document.getElementById('btnAgregarLote').style.opacity = '0.5';
+            }
+        }
+
+        function eliminarLote(id) {
+            document.getElementById(`lote-${id}`).remove();
+            lotesCount--;
+
+            if (lotesCount < 5) {
+                document.getElementById('btnAgregarLote').disabled = false;
+                document.getElementById('btnAgregarLote').style.opacity = '1';
+            }
+
+            calcularTotalTarjetas();
+        }
+
+        function calcularTotalTarjetas() {
+            const lotes = document.querySelectorAll('.lote-input');
+            let total = 0;
+            lotes.forEach(lote => {
+                total += parseFloat(lote.value) || 0;
+            });
+
+            document.getElementById('totalTarjetas').textContent = `Total Tarjetas: $${total.toLocaleString('es-AR')}`;
+            calcularBalance();
+        }
+
+        // Egresos
+        function calcularEgresos() {
+            const efectivo = parseFloat(document.getElementById('egrEfectivo').value) || 0;
+            const billetes = parseFloat(document.getElementById('egrBilletes').value) || 0;
+            const depositos = parseFloat(document.getElementById('egrDepositos').value) || 0;
+            const cuentas = parseFloat(document.getElementById('egrCuentas').value) || 0;
+            const medios = parseFloat(document.getElementById('egrMedios').value) || 0;
+            const otros = parseFloat(document.getElementById('egrOtros').value) || 0;
+
+            const total = efectivo + billetes + depositos + cuentas + medios + otros;
+            document.getElementById('totalEgresos').textContent = `Total Egresos: $${total.toLocaleString('es-AR')}`;
+            calcularBalance();
+        }
+
+        // Balance
+        function calcularBalance() {
+            const cobrosEfectivo = parseFloat(document.getElementById('cobrosEfectivo').value) || 0;
+            const cobrosTarjeta = parseFloat(document.getElementById('cobrosTarjeta').value) || 0;
+            const lotes = document.querySelectorAll('.lote-input');
+            let totalTarjetas = 0;
+            lotes.forEach(lote => {
+                totalTarjetas += parseFloat(lote.value) || 0;
+            });
+
+            const totalCobros = cobrosEfectivo + cobrosTarjeta + totalTarjetas;
+
+            const efectivo = parseFloat(document.getElementById('egrEfectivo').value) || 0;
+            const billetes = parseFloat(document.getElementById('egrBilletes').value) || 0;
+            const depositos = parseFloat(document.getElementById('egrDepositos').value) || 0;
+            const cuentas = parseFloat(document.getElementById('egrCuentas').value) || 0;
+            const medios = parseFloat(document.getElementById('egrMedios').value) || 0;
+            const otros = parseFloat(document.getElementById('egrOtros').value) || 0;
+
+            const totalEgresos = efectivo + billetes + depositos + cuentas + medios + otros;
+
+            const balance = totalCobros - totalEgresos;
+            document.getElementById('balanceFinal').textContent = `Balance Final: $${balance.toLocaleString('es-AR')}`;
+        }
+
+        // Guardar Cierre
+        async function guardarCierre() {
+            const fecha = document.getElementById('fechaCierre').value;
+            const turno = document.getElementById('turnoCierre').value;
+            const cajero = document.getElementById('cajero').value;
+
+            if (!cajero) {
+                alert('Ingresa tu nombre');
+                return;
+            }
+
+            try {
+                const lotes = document.querySelectorAll('.lote-input');
+                let totalTarjetas = 0;
+                lotes.forEach(lote => {
+                    totalTarjetas += parseFloat(lote.value) || 0;
+                });
+
+                const { data, error } = await db.from('cierres_turno').insert({
+                    fecha: fecha,
+                    turno: turno,
+                    cajero: cajero,
+                    total_liquidos: (parseFloat(document.getElementById('nafta95').value) || 0) + 
+                                    (parseFloat(document.getElementById('naftaInfinia').value) || 0) +
+                                    (parseFloat(document.getElementById('gasoil').value) || 0),
+                    total_gnc: parseFloat(document.getElementById('gnc').value) || 0,
+                    total_tarjetas: totalTarjetas,
+                    efectivo: parseFloat(document.getElementById('egrEfectivo').value) || 0,
+                    billetes: parseFloat(document.getElementById('egrBilletes').value) || 0,
+                    depositos: parseFloat(document.getElementById('egrDepositos').value) || 0,
+                    cuentas_corrientes: parseFloat(document.getElementById('egrCuentas').value) || 0,
+                    medios_virtuales: parseFloat(document.getElementById('egrMedios').value) || 0,
+                    otros: parseFloat(document.getElementById('egrOtros').value) || 0,
+                    cobros_efectivo: parseFloat(document.getElementById('cobrosEfectivo').value) || 0,
+                    cobros_tarjeta: parseFloat(document.getElementById('cobrosTarjeta').value) || 0,
+                    observaciones: document.getElementById('observaciones').value
+                });
+
+                if (error) throw error;
+
+                const msg = document.getElementById('cierreMessage');
+                msg.textContent = '✓ Cierre guardado exitosamente';
+                msg.classList.add('show');
+
+                setTimeout(() => {
+                    msg.classList.remove('show');
+                }, 3000);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error guardando cierre');
+            }
+        }
+
+        // Calculadora de Tope
+        function calcularTope() {
+            const tope = parseFloat(document.getElementById('topeDescuento').value);
+            const porcentaje = parseFloat(document.getElementById('porcentajeDescuento').value);
+
+            if (!tope || !porcentaje) {
+                document.getElementById('resultadoTope').innerHTML = '';
+                return;
+            }
+
+            const montoNecesario = tope / (porcentaje / 100);
+
+            document.getElementById('resultadoTope').innerHTML = `
+                <div class="total-box" style="margin-top: 20px;">
+                    <p style="font-size: 14px; margin-bottom: 10px;">El cliente debe gastar:</p>
+                    <p style="font-size: 32px;">$${montoNecesario.toLocaleString('es-AR', {maximumFractionDigits: 0})}</p>
+                    <p style="font-size: 14px; margin-top: 10px;">Para obtener un descuento de $${tope.toLocaleString('es-AR')}</p>
+                </div>
+            `;
+        }
+
+        // Cargar promociones al iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            buscarPromos();
+        });
+
+        // Cerrar modal al hacer click afuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('instruccionesModal');
+            if (event.target === modal) {
+                modal.classList.remove('show');
+            }
+        };
+    </script>
+</body>
+</html>
 
