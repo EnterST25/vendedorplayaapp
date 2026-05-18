@@ -14,23 +14,138 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0f0f0f;
+            color: #e0e0e0;
             min-height: 100vh;
             padding: 20px;
         }
 
-        .container {
+        /* PORTADA */
+        #portada {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        #portada.hidden {
+            display: none;
+        }
+
+        .portada-content {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .portada-logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .portada-titulo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .portada-subtitulo {
+            font-size: 18px;
+            color: #b0b0b0;
+            margin-bottom: 40px;
+        }
+
+        .portada-descripcion {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        .portada-botones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .portada-btn {
+            padding: 16px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .portada-btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .portada-btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .portada-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
+        }
+
+        .portada-btn-secondary:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .portada-titulo {
+                font-size: 32px;
+            }
+            .portada-botones {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* APP */
+        .app-container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: #1a1a1a;
             border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .app-container.hidden {
+            display: none;
         }
 
         .header {
-            background: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
-            color: white;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #000;
             padding: 30px;
             text-align: center;
         }
@@ -62,7 +177,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #4ade80;
+            background: #00ff00;
             animation: pulse 2s infinite;
         }
 
@@ -76,7 +191,7 @@
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
             padding: 30px;
-            background: #f8f9fa;
+            background: #252525;
         }
 
         .nav-btn {
@@ -93,31 +208,33 @@
             gap: 10px;
             text-align: center;
             color: white;
+            border: 2px solid transparent;
         }
 
         .nav-btn.promo {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%);
+            background: linear-gradient(135deg, #ff006e 0%, #c1001f 100%);
         }
 
         .nav-btn.pdf {
-            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
         }
 
         .nav-btn.cierre {
-            background: linear-gradient(135deg, #95E1D3 0%, #38A169 100%);
+            background: linear-gradient(135deg, #00ff88 0%, #00cc44 100%);
         }
 
         .nav-btn.calc {
-            background: linear-gradient(135deg, #F9D371 0%, #F4A259 100%);
+            background: linear-gradient(135deg, #ffa500 0%, #ff6600 100%);
         }
 
         .nav-btn.instrucciones {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #9d4edd 0%, #5a189a 100%);
         }
 
         .nav-btn:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
         }
 
         .nav-btn span {
@@ -127,6 +244,7 @@
         .content {
             padding: 30px;
             display: none;
+            background: #1a1a1a;
         }
 
         .content.active {
@@ -135,9 +253,9 @@
 
         .section-title {
             font-size: 24px;
-            color: #0052CC;
+            color: #00d4ff;
             margin-bottom: 20px;
-            border-bottom: 3px solid #0052CC;
+            border-bottom: 3px solid #00d4ff;
             padding-bottom: 10px;
         }
 
@@ -149,7 +267,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #333;
+            color: #e0e0e0;
         }
 
         .form-group input,
@@ -157,9 +275,11 @@
         .form-group textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #333;
             border-radius: 8px;
             font-size: 14px;
+            background: #252525;
+            color: #e0e0e0;
             transition: border-color 0.3s;
         }
 
@@ -167,7 +287,8 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #0052CC;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
         .btn {
@@ -181,23 +302,23 @@
         }
 
         .btn-primary {
-            background: #0052CC;
-            color: white;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #000;
         }
 
         .btn-primary:hover {
-            background: #003399;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 82, 204, 0.3);
         }
 
         .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
         }
 
         .btn-secondary:hover {
-            background: #d0d0d0;
+            background: #444;
         }
 
         .grid-2 {
@@ -210,30 +331,18 @@
             .grid-2 {
                 grid-template-columns: 1fr;
             }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .nav-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         .lote-item {
-            background: #f8f9fa;
+            background: #252525;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 10px;
-            border-left: 4px solid #0052CC;
-        }
-
-        .lote-item input {
-            margin-bottom: 10px;
+            border-left: 4px solid #00d4ff;
         }
 
         .lote-item button {
-            background: #ff6b6b;
+            background: #ff006e;
             color: white;
             padding: 8px 15px;
             border: none;
@@ -243,12 +352,12 @@
         }
 
         .lote-item button:hover {
-            background: #ff5252;
+            background: #c1001f;
         }
 
         .total-box {
-            background: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
-            color: white;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #000;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
@@ -265,24 +374,46 @@
         }
 
         .egreso-item {
-            background: #f8f9fa;
+            background: #252525;
             padding: 15px;
             border-radius: 8px;
-            border-left: 4px solid #FF6B6B;
+            border-left: 4px solid #ff006e;
         }
 
-        .egreso-item label {
-            display: block;
+        .promo-card {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .promo-card h4 {
+            color: #00d4ff;
             margin-bottom: 8px;
-            font-weight: 600;
         }
 
-        .egreso-item input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
+        .promo-card p {
             font-size: 14px;
+            color: #b0b0b0;
+            margin: 5px 0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background: #252525;
+            color: #e0e0e0;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
 
         /* Modal */
@@ -294,7 +425,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
             animation: fadeIn 0.3s;
         }
 
@@ -304,32 +435,16 @@
             justify-content: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
         .modal-content {
-            background-color: white;
+            background-color: #1a1a1a;
             padding: 30px;
             border-radius: 15px;
             width: 90%;
             max-width: 600px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideDown 0.3s;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
         }
 
         .modal-header {
@@ -337,12 +452,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #0052CC;
+            border-bottom: 2px solid #00d4ff;
             padding-bottom: 15px;
         }
 
         .modal-header h2 {
-            color: #0052CC;
+            color: #00d4ff;
         }
 
         .close-btn {
@@ -350,11 +465,11 @@
             border: none;
             font-size: 28px;
             cursor: pointer;
-            color: #666;
+            color: #888;
         }
 
         .close-btn:hover {
-            color: #000;
+            color: #00d4ff;
         }
 
         .instructions-list {
@@ -365,80 +480,60 @@
             margin-bottom: 15px;
             padding-left: 30px;
             position: relative;
+            color: #b0b0b0;
         }
 
         .instructions-list li:before {
             content: "✓";
             position: absolute;
             left: 0;
-            color: #0052CC;
+            color: #00d4ff;
             font-weight: bold;
             font-size: 18px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table th, table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-
         .success-message {
-            background: #d4edda;
-            color: #155724;
+            background: #1a3a1a;
+            color: #00ff88;
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
             display: none;
+            border-left: 4px solid #00ff88;
         }
 
         .success-message.show {
             display: block;
-            animation: slideDown 0.3s;
         }
 
-        .search-box {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        .promo-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #0052CC;
-        }
-
-        .promo-card h4 {
-            color: #0052CC;
-            margin-bottom: 8px;
-        }
-
-        .promo-card p {
-            font-size: 14px;
-            color: #666;
-            margin: 5px 0;
+        h3 {
+            color: #00d4ff;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- PORTADA -->
+    <div id="portada">
+        <div class="portada-content">
+            <div class="portada-logo">📊</div>
+            <div class="portada-titulo">VENDEDOR DE PLAYA</div>
+            <div class="portada-subtitulo">YPF Salta Capital</div>
+            <div class="portada-descripcion">
+                La herramienta profesional para gestionar tus promociones diarias, calcular descuentos y cerrar tu turno en segundos. Conectada a la nube, confiable y rápida.
+            </div>
+            <div class="portada-botones">
+                <button class="portada-btn portada-btn-primary" onclick="entrarApp()">
+                    Entrar a la App
+                </button>
+                <button class="portada-btn portada-btn-secondary" onclick="mostrarInstrucciones()">
+                    Instrucciones
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div class="app-container hidden">
         <!-- Header -->
         <div class="header">
             <h1>📊 Vendedor de Playa</h1>
@@ -488,7 +583,7 @@
                 <button class="btn btn-secondary" onclick="filtrarPorDia('TODOS')" style="padding: 15px;">VER TODOS</button>
             </div>
 
-            <h3 style="color: #0052CC; margin-top: 30px; margin-bottom: 15px;">🔍 O busca por Banco/Billetera</h3>
+            <h3 style="color: #00d4ff; margin-top: 30px; margin-bottom: 15px;">🔍 O busca por Banco/Billetera</h3>
             
             <input type="text" class="search-box" id="searchPromo" placeholder="ej: Macro, Galicia, Brubank, Credicoop, ACA, etc." onchange="buscarPorBanco()">
 
@@ -540,8 +635,7 @@
                 <input type="text" id="cajero" placeholder="Tu nombre">
             </div>
 
-            <!-- Ingresos por Combustible -->
-            <h3 style="margin-top: 30px; color: #0052CC;">💵 INGRESOS POR COMBUSTIBLE</h3>
+            <h3 style="margin-top: 30px;">💵 INGRESOS POR COMBUSTIBLE</h3>
             
             <div class="grid-2">
                 <div class="form-group">
@@ -562,8 +656,7 @@
                 </div>
             </div>
 
-            <!-- Lotes de Tarjetas -->
-            <h3 style="margin-top: 30px; color: #0052CC;">💳 LOTES DE TARJETAS (Máximo 5)</h3>
+            <h3 style="margin-top: 30px;">💳 LOTES DE TARJETAS (Máximo 5)</h3>
             
             <div id="lotesContainer"></div>
 
@@ -571,8 +664,7 @@
 
             <div class="total-box" id="totalTarjetas">Total Tarjetas: $0</div>
 
-            <!-- Egresos -->
-            <h3 style="margin-top: 30px; color: #FF6B6B;">📤 EGRESOS</h3>
+            <h3 style="margin-top: 30px;">📤 EGRESOS</h3>
 
             <div class="egresos-grid">
                 <div class="egreso-item">
@@ -603,8 +695,7 @@
 
             <div class="total-box" id="totalEgresos">Total Egresos: $0</div>
 
-            <!-- Cobros -->
-            <h3 style="margin-top: 30px; color: #0052CC;">💰 COBROS</h3>
+            <h3 style="margin-top: 30px;">💰 COBROS</h3>
 
             <div class="grid-2">
                 <div class="form-group">
@@ -617,7 +708,6 @@
                 </div>
             </div>
 
-            <!-- Observaciones -->
             <div class="form-group">
                 <label>Observaciones</label>
                 <textarea id="observaciones" placeholder="Notas del turno" rows="4"></textarea>
@@ -625,7 +715,7 @@
 
             <button class="btn btn-primary" onclick="guardarCierre()">💾 Guardar Cierre</button>
 
-            <div class="total-box" id="balanceFinal" style="margin-top: 20px; background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);">
+            <div class="total-box" id="balanceFinal" style="margin-top: 20px; background: linear-gradient(135deg, #00ff88 0%, #00cc44 100%); color: #000;">
                 Balance Final: $0
             </div>
 
@@ -660,22 +750,22 @@
                 <button class="close-btn" onclick="closeModal('instrucciones')">&times;</button>
             </div>
             
-            <h3 style="color: #0052CC; margin-top: 20px;">1. 🎯 Promociones</h3>
+            <h3>1. 🎯 Promociones</h3>
             <ul class="instructions-list">
-                <li>Selecciona una fecha o mes</li>
-                <li>Busca por banco (ej: Macro, Galicia, Brubank)</li>
-                <li>Verás todas las promociones activas</li>
-                <li>Consulta el descuento, tope mensual y detalles</li>
+                <li>Clickea el día de la semana que necesites</li>
+                <li>Verás todas las promociones activas para ese día</li>
+                <li>También puedes buscar por banco (ej: Macro, Galicia)</li>
+                <li>Consulta el descuento, tope y todos los detalles</li>
             </ul>
 
-            <h3 style="color: #0052CC; margin-top: 20px;">2. 📄 Cargar PDF</h3>
+            <h3 style="margin-top: 20px;">2. 📄 Cargar PDF</h3>
             <ul class="instructions-list">
                 <li>Sube el PDF con promociones del mes</li>
                 <li>Selecciona el mes correspondiente</li>
-                <li>Hace backup en la nube (Supabase)</li>
+                <li>Se guardará automáticamente en la nube</li>
             </ul>
 
-            <h3 style="color: #0052CC; margin-top: 20px;">3. 📋 Cierre de Turno</h3>
+            <h3 style="margin-top: 20px;">3. 📋 Cierre de Turno</h3>
             <ul class="instructions-list">
                 <li>Carga todas las ventas por combustible</li>
                 <li>Ingresa los lotes de tarjetas (máx 5)</li>
@@ -685,17 +775,17 @@
                 <li>Guarda todo en la nube</li>
             </ul>
 
-            <h3 style="color: #0052CC; margin-top: 20px;">4. 💰 Calculadora de Tope</h3>
+            <h3 style="margin-top: 20px;">4. 💰 Calculadora de Tope</h3>
             <ul class="instructions-list">
                 <li>Ingresa el tope de descuento del cliente</li>
                 <li>Ingresa el porcentaje de descuento</li>
                 <li>La app calcula cuánto debe consumir para maximizar el descuento</li>
             </ul>
 
-            <h3 style="color: #0052CC; margin-top: 20px;">5. 🔧 Requisitos</h3>
+            <h3 style="margin-top: 20px;">5. 🔧 Requisitos</h3>
             <ul class="instructions-list">
                 <li>Funciona en PC, tablet y celular</li>
-                <li>Necesita conexión a internet para sincronizar con Supabase</li>
+                <li>Necesita conexión a internet</li>
                 <li>Los datos se guardan automáticamente en la nube</li>
             </ul>
         </div>
@@ -710,7 +800,18 @@
 
         let lotesCount = 0;
 
-        // Funciones de Navegación
+        // Portada
+        function entrarApp() {
+            document.getElementById('portada').classList.add('hidden');
+            document.querySelector('.app-container').classList.remove('hidden');
+            filtrarPorDia('LUNES');
+        }
+
+        function mostrarInstrucciones() {
+            showModal('instrucciones');
+        }
+
+        // Navegación
         function showSection(sectionId) {
             document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
@@ -740,7 +841,7 @@
                 mostrarPromos(data || []);
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('resultadosPromo').innerHTML = '<p style="color:red;">Error cargando promociones</p>';
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color:#ff006e;">Error cargando promociones</p>';
             }
         }
 
@@ -748,7 +849,7 @@
             const search = document.getElementById('searchPromo').value.toLowerCase();
 
             if (!search) {
-                document.getElementById('resultadosPromo').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Escribe un banco o billetera para buscar</p>';
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Escribe un banco o billetera para buscar</p>';
                 return;
             }
 
@@ -763,54 +864,22 @@
                 );
 
                 if (filtered.length === 0) {
-                    document.getElementById('resultadosPromo').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No encontramos promociones para esa búsqueda</p>';
+                    document.getElementById('resultadosPromo').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No encontramos promociones para esa búsqueda</p>';
                 } else {
                     mostrarPromos(filtered);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('resultadosPromo').innerHTML = '<p style="color:red;">Error buscando promociones</p>';
-            }
-        }
-
-        async function buscarPromos() {
-            const fecha = document.getElementById('fechaPromo').value;
-            const mes = document.getElementById('mesPromo').value;
-            const search = document.getElementById('searchPromo').value.toLowerCase();
-
-            try {
-                let query = db.from('promociones').select('*');
-                
-                if (mes) {
-                    query = query.eq('mes', mes);
-                }
-                
-                const { data, error } = await query;
-
-                if (error) throw error;
-
-                let filtered = data || [];
-                if (search) {
-                    filtered = filtered.filter(p => 
-                        p.detalles.toLowerCase().includes(search) ||
-                        p.descuento.toLowerCase().includes(search)
-                    );
-                }
-
-                mostrarPromos(filtered);
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('resultadosPromo').innerHTML = '<p style="color:red;">Error cargando promociones</p>';
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color:#ff006e;">Error buscando promociones</p>';
             }
         }
 
         function mostrarPromos(promos) {
             if (promos.length === 0) {
-                document.getElementById('resultadosPromo').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No hay promociones</p>';
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No hay promociones</p>';
                 return;
             }
 
-            // Agrupar por día
             const porDia = {};
             promos.forEach(p => {
                 if (!porDia[p.dia]) {
@@ -824,14 +893,14 @@
             
             orden.forEach(dia => {
                 if (porDia[dia]) {
-                    html += `<h3 style="color: #0052CC; margin-top: 25px; margin-bottom: 15px;">${dia}</h3>`;
+                    html += `<h3 style="color: #00d4ff; margin-top: 25px; margin-bottom: 15px;">${dia}</h3>`;
                     porDia[dia].forEach(p => {
                         html += `
                             <div class="promo-card">
                                 <h4>${p.detalles}</h4>
                                 <p><strong>Descuento:</strong> ${p.descuento}</p>
                                 <p><strong>Tope:</strong> ${p.tope}</p>
-                                <p style="font-size: 12px; color: #999; margin-top: 10px;">Categoría: ${p.categoria}</p>
+                                <p style="font-size: 12px; color: #666; margin-top: 10px;">Categoría: ${p.categoria}</p>
                             </div>
                         `;
                     });
@@ -869,7 +938,7 @@
                 }, 3000);
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('pdfMessage').innerHTML = '<p style="color:red;">Error cargando PDF</p>';
+                document.getElementById('pdfMessage').innerHTML = '<p style="color:#ff006e;">Error cargando PDF</p>';
             }
         }
 
@@ -1028,17 +1097,12 @@
 
             document.getElementById('resultadoTope').innerHTML = `
                 <div class="total-box" style="margin-top: 20px;">
-                    <p style="font-size: 14px; margin-bottom: 10px;">El cliente debe gastar:</p>
-                    <p style="font-size: 32px;">$${montoNecesario.toLocaleString('es-AR', {maximumFractionDigits: 0})}</p>
-                    <p style="font-size: 14px; margin-top: 10px;">Para obtener un descuento de $${tope.toLocaleString('es-AR')}</p>
+                    <p style="font-size: 14px; margin-bottom: 10px; color: #000;">El cliente debe gastar:</p>
+                    <p style="font-size: 32px; color: #000;">$${montoNecesario.toLocaleString('es-AR', {maximumFractionDigits: 0})}</p>
+                    <p style="font-size: 14px; margin-top: 10px; color: #000;">Para obtener un descuento de $${tope.toLocaleString('es-AR')}</p>
                 </div>
             `;
         }
-
-        // Cargar promociones al iniciar
-        window.addEventListener('DOMContentLoaded', () => {
-            filtrarPorDia('LUNES');
-        });
 
         // Cerrar modal al hacer click afuera
         window.onclick = function(event) {
