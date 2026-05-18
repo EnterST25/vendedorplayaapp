@@ -475,26 +475,22 @@
 
         <!-- Promociones Section -->
         <div id="promociones" class="content">
-            <h2 class="section-title">🎯 Consultar Promociones por Fecha</h2>
+            <h2 class="section-title">🎯 Promociones por Día de la Semana</h2>
             
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Fecha</label>
-                    <input type="date" id="fechaPromo" value="2026-05-16">
-                </div>
-                <div class="form-group">
-                    <label>Mes</label>
-                    <select id="mesPromo">
-                        <option value="">-- Todos --</option>
-                        <option value="Mayo">Mayo 2026</option>
-                        <option value="Junio">Junio 2026</option>
-                    </select>
-                </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 30px;">
+                <button class="btn btn-primary" onclick="filtrarPorDia('LUNES')" style="padding: 15px;">LUNES</button>
+                <button class="btn btn-primary" onclick="filtrarPorDia('MARTES')" style="padding: 15px;">MARTES</button>
+                <button class="btn btn-primary" onclick="filtrarPorDia('MIERCOLES')" style="padding: 15px;">MIÉRCOLES</button>
+                <button class="btn btn-primary" onclick="filtrarPorDia('JUEVES')" style="padding: 15px;">JUEVES</button>
+                <button class="btn btn-primary" onclick="filtrarPorDia('VIERNES')" style="padding: 15px;">VIERNES</button>
+                <button class="btn btn-primary" onclick="filtrarPorDia('SABADO')" style="padding: 15px;">SÁBADO</button>
+                <button class="btn btn-primary" onclick="filtrarPorDia('DOMINGO')" style="padding: 15px;">DOMINGO</button>
+                <button class="btn btn-secondary" onclick="filtrarPorDia('TODOS')" style="padding: 15px;">VER TODOS</button>
             </div>
 
-            <input type="text" class="search-box" id="searchPromo" placeholder="🔍 Buscar por banco/empresa (ej: Macro, Brubank, etc.)">
-
-            <button class="btn btn-primary" onclick="buscarPromos()">Buscar Promociones</button>
+            <h3 style="color: #0052CC; margin-top: 30px; margin-bottom: 15px;">🔍 O busca por Banco/Billetera</h3>
+            
+            <input type="text" class="search-box" id="searchPromo" placeholder="ej: Macro, Galicia, Brubank, Credicoop, ACA, etc." onchange="buscarPorBanco()">
 
             <div id="resultadosPromo"></div>
         </div>
@@ -729,6 +725,54 @@
         }
 
         // Promociones
+        async function filtrarPorDia(dia) {
+            try {
+                let query = db.from('promociones').select('*');
+                
+                if (dia !== 'TODOS') {
+                    query = query.or(`dia.eq.${dia},dia.eq.TODOS`);
+                }
+                
+                const { data, error } = await query;
+
+                if (error) throw error;
+
+                mostrarPromos(data || []);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color:red;">Error cargando promociones</p>';
+            }
+        }
+
+        async function buscarPorBanco() {
+            const search = document.getElementById('searchPromo').value.toLowerCase();
+
+            if (!search) {
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Escribe un banco o billetera para buscar</p>';
+                return;
+            }
+
+            try {
+                const { data, error } = await db.from('promociones').select('*');
+
+                if (error) throw error;
+
+                const filtered = (data || []).filter(p => 
+                    p.detalles.toLowerCase().includes(search) ||
+                    p.descuento.toLowerCase().includes(search)
+                );
+
+                if (filtered.length === 0) {
+                    document.getElementById('resultadosPromo').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No encontramos promociones para esa búsqueda</p>';
+                } else {
+                    mostrarPromos(filtered);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color:red;">Error buscando promociones</p>';
+            }
+        }
+
         async function buscarPromos() {
             const fecha = document.getElementById('fechaPromo').value;
             const mes = document.getElementById('mesPromo').value;
@@ -761,16 +805,38 @@
         }
 
         function mostrarPromos(promos) {
-            const html = promos.length === 0 
-                ? '<p style="color: #999; text-align: center; padding: 20px;">No hay promociones para esa búsqueda</p>'
-                : promos.map(p => `
-                    <div class="promo-card">
-                        <h4>${p.descuento}</h4>
-                        <p><strong>Categoría:</strong> ${p.categoria}</p>
-                        <p><strong>Detalles:</strong> ${p.detalles}</p>
-                        <p><strong>Tope:</strong> ${p.tope}</p>
-                    </div>
-                `).join('');
+            if (promos.length === 0) {
+                document.getElementById('resultadosPromo').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No hay promociones</p>';
+                return;
+            }
+
+            // Agrupar por día
+            const porDia = {};
+            promos.forEach(p => {
+                if (!porDia[p.dia]) {
+                    porDia[p.dia] = [];
+                }
+                porDia[p.dia].push(p);
+            });
+
+            let html = '';
+            const orden = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO', 'TODOS'];
+            
+            orden.forEach(dia => {
+                if (porDia[dia]) {
+                    html += `<h3 style="color: #0052CC; margin-top: 25px; margin-bottom: 15px;">${dia}</h3>`;
+                    porDia[dia].forEach(p => {
+                        html += `
+                            <div class="promo-card">
+                                <h4>${p.detalles}</h4>
+                                <p><strong>Descuento:</strong> ${p.descuento}</p>
+                                <p><strong>Tope:</strong> ${p.tope}</p>
+                                <p style="font-size: 12px; color: #999; margin-top: 10px;">Categoría: ${p.categoria}</p>
+                            </div>
+                        `;
+                    });
+                }
+            });
 
             document.getElementById('resultadosPromo').innerHTML = html;
         }
@@ -971,7 +1037,7 @@
 
         // Cargar promociones al iniciar
         window.addEventListener('DOMContentLoaded', () => {
-            buscarPromos();
+            filtrarPorDia('LUNES');
         });
 
         // Cerrar modal al hacer click afuera
@@ -984,4 +1050,3 @@
     </script>
 </body>
 </html>
-
