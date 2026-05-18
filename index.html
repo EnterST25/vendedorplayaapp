@@ -46,10 +46,17 @@
             max-width: 600px;
         }
 
-        .portada-logo {
-            font-size: 80px;
+      .portada-logo {
+            width: 100%;
+            max-width: 420px;
             margin-bottom: 20px;
-            animation: bounce 2s infinite;
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 180, 255, 0.3);
+            animation: fadeIn 1.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes bounce {
@@ -515,7 +522,7 @@
     <!-- PORTADA -->
     <div id="portada">
         <div class="portada-content">
-            <div class="portada-logo">📊</div>
+           <img class="portada-logo" src="https://res.cloudinary.com/dpsrjngts/image/upload/vendedor_de_playa_i2eal3" alt="Vendedor de Playa YPF">
             <div class="portada-titulo">VENDEDOR DE PLAYA</div>
             <div class="portada-subtitulo">YPF Salta Capital</div>
             <div class="portada-descripcion">
