@@ -938,38 +938,33 @@
         });
 
         // Mandar a Claude IA
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'claude-opus-4-5',
-                max_tokens: 4000,
-                messages: [{
-                    role: 'user',
-                    content: [
-                        {
-                            type: 'document',
-                            source: { type: 'base64', media_type: 'application/pdf', data: base64 }
-                        },
-                        {
-                            type: 'text',
-                            text: `Analizá este PDF de promociones YPF del mes ${mes}. 
-Extraé TODAS las promociones de combustibles, tiendas, GNC y boxes.
-Para cada promoción devolvé un objeto JSON con estos campos exactos:
-- banco: nombre del banco o billetera (ej: "Galicia", "Brubank", "MODO", "App YPF")
-- dia: día de la semana en español mayúsculas (ej: "LUNES", "MARTES") o "TODOS" si aplica todos los días
-- descuento: número entero sin % (ej: 10, 15, 20)
-- tope: texto del tope (ej: "$3.000 semanal", "$15.000 mensual")
-- categoria: una de estas opciones exactas: "Combustibles", "Tiendas", "GNC", "Boxes"
-- detalles: descripción breve de la promo
+        // Mandar a Gemini IA
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            {
+                                inline_data: {
+                                    mime_type: 'application/pdf',
+                                    data: base64
+                                }
+                            },
+                            {
+                                text: `Analizá este PDF de promociones YPF del mes ${mes}. Extraé TODAS las promociones de combustibles, tiendas, GNC y boxes. Para cada promoción devolvé un objeto JSON con estos campos exactos: banco (nombre del banco o billetera), dia (LUNES/MARTES/MIÉRCOLES/JUEVES/VIERNES/SÁBADO/DOMINGO/TODOS), descuento (número entero sin %), tope (texto del tope), categoria (Combustibles, Tiendas, GNC o Boxes), detalles (descripción breve). Respondé ÚNICAMENTE con un array JSON válido sin texto adicional ni markdown.`
+                            }
+                        ]
+                    }]
+                })
+            }
+        );
 
-Respondé ÚNICAMENTE con un array JSON válido, sin texto adicional, sin comillas extras, sin markdown. Ejemplo:
-[{"banco":"Galicia","dia":"LUNES","descuento":10,"tope":"$3.000 semanal","categoria":"Combustibles","detalles":"10% en Infinia con dinero en cuenta"}]`
-                        }
-                    ]
-                }]
-            })
-        });
+        const data = await response.json();
+        const texto = data.candidates[0].content.parts[0].text.trim().replace(/```json|```/g, '');
+        const promos = JSON.parse(texto);
                // Insertar en Supabase
         let ok = 0, err = 0;
         for (const p of promos) {
