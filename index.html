@@ -970,12 +970,7 @@ Respondé ÚNICAMENTE con un array JSON válido, sin texto adicional, sin comill
                 }]
             })
         });
-
-        const data = await response.json();
-        const texto = data.content[0].text.trim();
-        const promos = JSON.parse(texto);
-
-        // Insertar en Supabase
+               // Insertar en Supabase
         let ok = 0, err = 0;
         for (const p of promos) {
             const { error } = await db.from('promociones').insert({
